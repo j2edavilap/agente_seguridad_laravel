@@ -1,0 +1,69 @@
+# Codex .rules — segunda capa de bloqueo de comandos.
+# Copiar en <proyecto-auditado>/.codex/rules/laravel-audit.rules
+#
+# Requisito: la capa .codex/ del proyecto debe estar marcada como confiable para que
+# estas reglas se carguen. Las reglas se aplican a comandos que Codex ejecutaría fuera
+# del sandbox; el perfil de .codex/config.toml sigue siendo la barrera principal.
+#
+# Limitación: el patrón se compara con la lista de argumentos desde argv[0]. No cubre
+# rutas absolutas al intérprete (por ejemplo E:\laragon_8\bin\php\php.exe artisan migrate)
+# ni scripts lanzados desde un shell con redirecciones o variables.
+#
+# Verificar con: codex execpolicy check --pretty --rules .codex/rules/laravel-audit.rules -- <comando>
+
+prefix_rule(
+    pattern = ["git", ["commit", "push", "reset", "checkout", "clean", "stash", "apply", "merge", "rebase"]],
+    decision = "forbidden",
+    justification = "La auditoría es de solo lectura sobre git. Usa git status/log/diff/show.",
+    match = [
+        "git commit -am wip",
+        "git push origin main",
+        "git reset --hard",
+    ],
+    not_match = [
+        "git status",
+        "git log --oneline -5",
+        "git diff HEAD",
+    ],
+)
+
+prefix_rule(
+    pattern = ["composer", ["require", "update", "remove"]],
+    decision = "forbidden",
+    justification = "No se instalan ni actualizan dependencias durante la auditoría. Usa composer audit.",
+    match = [
+        "composer require laravel/pint",
+        "composer update",
+    ],
+    not_match = [
+        "composer audit",
+        "composer show --direct",
+    ],
+)
+
+prefix_rule(
+    pattern = ["php", "artisan", ["migrate", "db:wipe", "db:seed", "key:generate", "config:cache", "route:cache", "view:cache", "optimize", "storage:link"]],
+    decision = "forbidden",
+    justification = "Comandos que modifican estado, datos o claves del proyecto auditado.",
+    match = [
+        "php artisan migrate --force",
+        "php artisan key:generate",
+    ],
+    not_match = [
+        "php artisan route:list",
+        "php artisan about",
+    ],
+)
+
+prefix_rule(
+    pattern = [["rm", "rmdir", "del"]],
+    decision = "forbidden",
+    justification = "La auditoría no borra archivos. Registra el hallazgo en reports/.",
+    match = [
+        "rm -rf build",
+        "rmdir storage/framework/cache",
+    ],
+    not_match = [
+        "ls -la",
+    ],
+)

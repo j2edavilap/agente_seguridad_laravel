@@ -1,0 +1,32 @@
+# Codex — perfil de permisos para auditar un proyecto Laravel sin modificarlo.
+# Copiar en <proyecto-auditado>/.codex/config.toml
+#
+# BETA: los perfiles de permisos de Codex están en desarrollo activo y pueden cambiar.
+# No mezclar con sandbox_mode / sandbox_workspace_write: si aparece sandbox_mode en
+# cualquier capa de configuración, Codex usa el sandbox antiguo e ignora este perfil.
+#
+# El perfil es la barrera REAL de solo lectura: el sandbox impide escribir fuera de
+# reports/. El prompt (AGENTS.md) no es una barrera de seguridad.
+
+default_permissions = "laravel-audit"
+
+[permissions.laravel-audit]
+description = "Auditoría Laravel de solo lectura: escritura únicamente en reports/ y scope/authorization.draft.md."
+extends = ":read-only"
+
+[permissions.laravel-audit.filesystem]
+":minimal" = "read"
+glob_scan_max_depth = 3
+
+# Rutas relativas a cada workspace root del proyecto auditado.
+# La entrada más específica gana: "reports" reabre escritura dentro de un "." de solo lectura.
+# scope/authorization.md NO aparece: hereda el "read" de "." y el agente nunca puede autorizarse solo.
+[permissions.laravel-audit.filesystem.":workspace_roots"]
+"." = "read"
+"reports" = "write"
+"scope/authorization.draft.md" = "write"
+
+# Las pruebas dinámicas necesitan salir a staging.
+# Los dominios de permiso solo se aplican si además se activa [features] network_proxy = true.
+[permissions.laravel-audit.network]
+enabled = true

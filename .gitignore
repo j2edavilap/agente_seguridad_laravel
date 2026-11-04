@@ -1,0 +1,19 @@
+# Generado por build-variants.ps1 — no editar a mano
+dist/
+
+# Backups automáticos de deploy.ps1
+*.bak_*
+
+# Entornos locales
+.env
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
