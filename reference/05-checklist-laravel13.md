@@ -120,4 +120,23 @@ El agente marca `aprobada`, `fallida` o `bloqueada`; nunca deja una fila sin est
 
 ## F. Trazabilidad mínima por hallazgo
 
-Todo hallazgo debe declarar: `ID`, `título`, `severidad CVSS`, `estado`, `OWASP/CWE`, `ubicación exacta`, `evidencia enmascarada`, `reproducción`, `remediación`, `ISO 27001`, `ISO 25010`, `ISO 29119-4`, `esfuerzo`, `responsable`.
+Todo hallazgo debe declarar: ID, título, severidad CVSS, estado, OWASP/CWE, ubicación exacta, evidencia enmascarada, reproducción, remediación, ISO 27001, ISO 25010, ISO 29119-4, esfuerzo, responsable.
+
+## G. Nuevos vectores de ataque y defensas requeridas
+
+Los siguientes controles se agregan para cubrir ataques no incluidos en las secciones anteriores. Cada uno debe evaluarse explícitamente cuando exista un login de administración o una capa de API expuesta.
+
+| # | Control | Esperado | Ref |
+|---|---|---|---|
+| G1 | Rate limiter global por IP en login (independiente del usuario) | presente | A.5.17 / CWE-307 |
+| G2 | Rate limiter por usuario objetivo en login (independiente de IP) | presente | A.5.17 / CWE-307 |
+| G3 | Bloqueo progresivo exponencial tras N fallos de login | presente | A.5.17 / CWE-307 |
+| G4 | CAPTCHA (Turnstile / reCAPTCHA v3) en login tras umbral de fallos | presente si aplica | A.5.17 / CWE-307 |
+| G5 | Mensaje genérico de error en login (no revela si usuario existe) | presente | A.5.17 / CWE-203 |
+| G6 | Cabecera Retry-After en respuestas 429 de login | presente si aplica | A.5.17 / CWE-307 |
+| G7 | Endpoints de login en API con throttle:api o middleware personalizado | presente | A.5.17 / API1:2023 |
+| G8 | Endpoints de API autenticados con Sanctum o Passport (no solo sesión) | presente si aplica | API1:2023 / API2:2023 |
+| G9 | CSRF no desactivado en endpoints API que mutan estado (POST/PUT/DELETE) | presente | CWE-352 / API3:2023 |
+| G10 | Límite de intentos de validación OTP/PIN (máximo 3-5) antes de destruir token | presente si aplica | A.5.17 / CWE-307 |
+| G11 | OTP con expiración corta (5-10 minutos) | presente si aplica | A.5.17 / CWE-307 |
+| G12 | Rate limiter por usuario|otp y ip|otp | presente si aplica | A.5.17 / CWE-307 |

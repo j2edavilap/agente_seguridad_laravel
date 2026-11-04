@@ -31,6 +31,7 @@ Assumptions:
 - T5 (S9) — update `README.md`, `AGENTS.md`, `CHANGELOG.md` with runtime matrix and limitations. Route: inline. Status: done.
 - T6 (S2, S8) — run generator + deployer, validate all artifacts. Route: inline. Status: done.
 - T7 (S10) — independent verification found mojibake in the Codex artifacts caused by the generator's own missing BOM. Fixed scripts to UTF-8 with BOM, added a self-guard, fixed the ANSI `Get-Content` read in `deploy.ps1`, deepened the deployer's kit validation, and added `tools/tests/verify-variants.ps1` as the regression. Route: inline. Status: done.
+- T8 (S1-S8, new attack vectors) — integrate new attack vectors (reverse brute force, credential stuffing, API endpoint attacks, OTP/PIN brute force) into subagents and reference docs; add remediation delivery flow (`ENTREGA_REMEDIACION_*.md`) and section 11 in orchestrator. Route: inline. Status: done.
 
 ## Log
 
@@ -63,3 +64,5 @@ L9 — Fixes (T7):
 - `tools/tests/verify-variants.ps1` added: generates into a temp dir, validates encoding (no BOM, no U+FFFD, no mojibake), Claude frontmatter and tool substitution, TOML delimiters, Codex profile and rules, deployer contract, and byte parity with `dist/`. Cleans its temp dir unless `-KeepOutput`.
 
 L10 — Evidence after the fix: `tools/tests/verify-variants.ps1` → `TODO CORRECTO`, 0 failures (12 artifacts, all encoding checks pass, 98 deny / 2 allow rules, 4 prefix_rule blocks, parity with `dist/`). `deploy.ps1` → `OK: OpenCode, Claude Code y Codex validados.` Files verified byte-level: `dist/codex/project-kit/AGENTS.md` line 3 is `# Protocolo de auditoría de seguridad — Laravel 13 / PHP 8.5` with no mojibake. The remaining garbling of accented words in the console output is `[Console]::OutputEncoding = ibm850` on this machine, not file corruption.
+
+L11 — Integration of new attack vectors (T8): added reverse brute force, credential stuffing distributed, API endpoint attacks, and OTP/PIN brute force to `reference/06-mejores-practicas-laravel13.md` (section 3), `reference/05-checklist-laravel13.md` (section G with G1–G12), `agents/sec-dynamic.md` (tests), `agents/sec-static.md` (fallback grep checks), `agents/laravel-sec-auditor.md` (section 11 remediation delivery), and `reference/01-reglas-y-flujo.md` (remediation flow). Created `ENTREGA_REMEDIACION_MONTES_ADMIN.md` as the delivery document for the remediation agent. All changes regenerated to `dist/` and installed in the three runtimes; regression `TODO CORRECTO`.

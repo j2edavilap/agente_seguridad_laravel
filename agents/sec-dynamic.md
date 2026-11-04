@@ -74,14 +74,19 @@ Herramientas HTTP: `curl.exe` (Windows) o `Invoke-WebRequest`. Registra el coman
 
 - **Enumeración de usuarios**: compara respuesta/tiempo de login con usuario existente vs inexistente.
 - **Fuerza bruta / lockout**: verifica que exista rate limiting o bloqueo. **No** ejecutes más de 5 intentos fallidos.
+- **Fuerza bruta inversa**: verifica que exista rate limiter global por IP (independiente del usuario) y rate limiter por usuario objetivo (independiente de IP). Un atacante no debe poder probar una contraseña común contra muchos usuarios sin activar bloqueo. (G1, G2)
 - **Cierre de sesión**: verifica que al cerrar sesión se invoque `Auth::logout()` + `$request->session()->invalidate()` + `regenerateToken()` (S22).
 - **Rate limiting en endpoints costosos**: confirma que existan límites en login, recuperación y endpoints de API con carga alta (V7).
+- **Credential Stuffing Distribuido**: verifica que exista CAPTCHA (Turnstile / reCAPTCHA v3) en login tras umbral de fallos, y análisis de comportamiento para detectar miles de IPs probando pares usuario/contraseña. (G4)
+- **Mensaje genérico**: confirma que el error de login no revela si el usuario existe (mensaje uniforme "Usuario o clave incorrectos"). (G5)
+- **Cabecera Retry-After**: verifica que las respuestas 429 de login incluyan `Retry-After` cuando corresponda. (G6)
 - **Reset de contraseña**: entropía y expiración del token, token de un solo uso, host header injection, respuesta uniforme.
 - **Sesión**: regeneración de ID al iniciar sesión, invalidación al cerrar, cookies `Secure`/`HttpOnly`/`SameSite`, `session.use_strict_mode`.
 - **Fijación de sesión**: reutilización de un ID de sesión previo al login.
 - **MFA/Passkeys** (Fortify/Sanctum): obligatorio para roles sensibles; bypass enviando el paso directamente.
 - **Tokens Sanctum**: abilities, expiración, revocación, `tokenCan` en rutas.
 - **"Recordarme"**: validez y rotación.
+- **Fuerza Bruta a OTP / PIN** (G10, G11, G12): si la aplicación implementa códigos de verificación (OTP/PIN) para saltarse la contraseña o como segundo factor, verifica que exista límite de 3-5 intentos antes de destruir el token, expiración corta (5-10 min), y rate limiter por `usuario|otp` y `ip|otp`. Si no existe OTP/PIN, declara como `no aplicable` pero anota que cualquier implementación futura debe incluir estas defensas desde el diseño.
 
 ## 3. A-INYECCION — Inyección (ISO 27001 A.8.28, ISO 25010)
 
@@ -133,6 +138,7 @@ Registra: petición, respuesta (enmascarada), diferencia observada, conclusión.
 
 - **BOLA/BOPLA**: objetos y funciones por rol.
 - **Rate limiting**: login, recuperación, endpoints costosos.
+- **Ataque a Endpoints de API**: verifica que `routes/api.php` (o el grupo `api` en `web.php`) incluya middleware `throttle:api` o equivalente, y que los endpoints que mutan estado requieran autenticación (Sanctum/Passport) y no desactiven CSRF sin justificación. Busca usos de `withoutMiddleware([PreventRequestForgery::class])` en rutas POST/PUT/DELETE. (G7, G8, G9)
 - **Octane** (si la aplicación lo usa): verifica configuración de workers (`--workers`) y max-requests (`--max-requests`) para evitar fugas de memoria; servidor FrankenPHP/RoadRunner/Swoole (V8, V9).
 - **Paginación**: límites máximos, `per_page` abusivo.
 - **Mass assignment vía API**: campos no permitidos.

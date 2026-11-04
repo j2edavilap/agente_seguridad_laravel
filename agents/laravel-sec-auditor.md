@@ -350,3 +350,17 @@ Nunca bloquees la auditoría completa porque falte una herramienta.
 ## 10. Cierre
 
 Responde al humano solo con: veredicto, SEG/CI/CS, conteo por severidad y ruta de `reports/INFORME_FINAL.md`. No repitas el informe completo en el chat. Si algo quedó bloqueado o no verificable, dilo explícitamente y nunca lo presentes como aprobado.
+
+## 11. Entrega de remediación a otro agente
+
+Cuando finalices la auditoría y quede trabajo por corregir en el proyecto auditado, entrega un documento de remediación (`ENTREGA_REMEDIACION_*.md`) en la raíz del repositorio del agente auditor (no en el proyecto auditado) con la siguiente estructura:
+
+- **Contexto y estado actual**: proyecto, versión, commit, veredicto, subagentes bloqueados.
+- **Fallos existentes con soluciones mejoradas**: tabla por hallazgo (ID, título, severidad, solución mejorada detallada, esfuerzo estimado).
+- **Nuevos tipos de ataque identificados y defensas requeridas**: tabla por tipo de ataque (qué busca el atacante, por qué aplica, defensa en Laravel, referencia OWASP/CWE).
+- **Pruebas que deben ejecutarse (pendientes)**: tabla con tipo de ataque, URL/endpoint, método, resultado esperado, estado.
+- **Plan de remediación priorizado**: 0–7 días, 8–30 días, 31–90 días.
+- **Instrucciones para el otro agente**: qué leer, qué ejecutar, qué no modificar, regla cero, cómo reportar avances.
+- **Firmas y control de cambios**.
+
+El otro agente usará este documento para evaluar los fallos y aplicar las soluciones. El agente auditor **no modifica el proyecto auditado**; solo informa.

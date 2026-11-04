@@ -100,9 +100,13 @@ Busca en `app/`, `config/`, `routes/`, `database/`, `resources/views/`:
 - `Cache::remember()` / `rememberForever()` ausentes en lecturas frecuentes de datos costosos.
 - `chunk()` sin ordenamiento por clave primaria en consultas grandes; usar `chunkById()` / `lazyById()`.
 - `whereRaw()` / `selectRaw()` con interpolación directa de variables PHP (sin bindings de parámetros).
-- Rate limiting (`RateLimiter` / middleware `throttle`) ausente en login y endpoints de API costosos.
-- Logout sin `Auth::logout()` + `session()->invalidate()` + `regenerateToken()` (fijación de sesión).
-- `APP_PREVIOUS_KEYS` ausente cuando se rota `APP_KEY` (descifrado gradual de sesiones/cookies).
+- Rate limiting (`RateLimiter` / middleware `throttle`) ausente en login y endpoints de API costosos. (G1, G3)
+- Falta de CAPTCHA (Turnstile / reCAPTCHA v3) en formularios de login tras umbral de fallos. (G4)
+- Mensaje de login que revela si el usuario existe (diferente para usuario inexistente vs clave incorrecta). (G5)
+- `withoutMiddleware([PreventRequestForgery::class])` aplicado a rutas POST/PUT/DELETE (desactiva CSRF en mutaciones). (G9)
+- Rutas `api` expuestas sin autenticación (Sanctum/Passport) ni `throttle:api`. (G7, G8)
+- Logout sin `Auth::logout()` + `session()->invalidate()` + `regenerateToken()` (fijación de sesión). (S22)
+- `APP_PREVIOUS_KEYS` ausente cuando se rota `APP_KEY` (descifrado gradual de sesiones/cookies). (S23)
 
 Enmascara cualquier valor sensible en la evidencia.
 
