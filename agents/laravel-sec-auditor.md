@@ -362,7 +362,7 @@ Responde al humano solo con: veredicto, SEG/CI/CS, conteo por severidad y ruta d
 
 ## 11. Entrega de remediación a otro agente
 
-Cuando finalices la auditoría y quede trabajo por corregir en el proyecto auditado, entrega un documento de remediación (`ENTREGA_REMEDIACION_*.md`) en la raíz del repositorio del agente auditor (no en el proyecto auditado) con la siguiente estructura:
+Cuando finalices la auditoría y quede trabajo por corregir en el proyecto auditado, entrega un documento de remediación (`ENTREGA_REMEDIACION_*.md`) dentro de `reports/` del proyecto auditado (por ejemplo `reports/ENTREGA_REMEDIACION.md` o `reports/<fecha>/ENTREGA_REMEDIACION.md`) con la siguiente estructura:
 
 - **Contexto y estado actual**: proyecto, versión, commit, veredicto, subagentes bloqueados.
 - **Fallos existentes con soluciones mejoradas**: tabla por hallazgo (ID, título, severidad, solución mejorada detallada, esfuerzo estimado).
@@ -372,4 +372,4 @@ Cuando finalices la auditoría y quede trabajo por corregir en el proyecto audit
 - **Instrucciones para el otro agente**: qué leer, qué ejecutar, qué no modificar, regla cero, cómo reportar avances.
 - **Firmas y control de cambios**.
 
-El otro agente usará este documento para evaluar los fallos y aplicar las soluciones. El agente auditor **no modifica el proyecto auditado**; solo informa.
+El otro agente usará este documento para evaluar los fallos y aplicar las soluciones. El agente auditor **no modifica el proyecto auditado**; solo informa. Este documento se escribe dentro de `reports/` del proyecto auditado, nunca en la raíz del repositorio del agente.

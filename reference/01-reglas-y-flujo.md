@@ -114,7 +114,7 @@ Si necesitas ampliar lo que el agente puede hacer, edita los permisos en `agents
 
 ## Flujo de entrega de remediación
 
-Cuando la auditoría finalice y quede trabajo por corregir en el proyecto auditado, el orquestador entrega un documento de remediación (`ENTREGA_REMEDIACION_*.md`) en la raíz del repositorio del agente auditor (no en el proyecto auditado). Ese documento contiene:
+Cuando la auditoría finalice y quede trabajo por corregir en el proyecto auditado, el orquestador entrega un documento de remediación (`ENTREGA_REMEDIACION_*.md`) dentro de `reports/` del proyecto auditado (por ejemplo `reports/ENTREGA_REMEDIACION.md` o `reports/<fecha>/ENTREGA_REMEDIACION.md`). Ese documento contiene:
 
 - Contexto y estado actual del proyecto auditado.
 - Fallos existentes con soluciones mejoradas.
@@ -123,4 +123,4 @@ Cuando la auditoría finalice y quede trabajo por corregir en el proyecto audita
 - Plan de remediación priorizado (0–7 días, 8–30 días, 31–90 días).
 - Instrucciones para el otro agente que aplicará las soluciones.
 
-El agente auditor no modifica el proyecto auditado. El otro agente (remediador) es el encargado de aplicar los parches si está autorizado, y debe reportar avances sin modificar este repositorio de agente.
+El agente auditor no modifica el proyecto auditado más allá de escribir este documento dentro de `reports/`. El otro agente (remediador) es el encargado de aplicar los parches si está autorizado, y debe reportar avances sin modificar este repositorio de agente.
