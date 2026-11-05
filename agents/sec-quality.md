@@ -89,6 +89,59 @@ Antes de ejecutar la suite:
 - **Octane** (si la aplicación lo usa): `config/octane.php` con `workers`, `max_requests`, `max_execution_time` configurados; servidor FrankenPHP/RoadRunner/Swoole (V9).
 - **Caché de despliegue**: `config:cache`, `route:cache`, `view:cache`, `event:cache` ejecutados en el pipeline (V3).
 
+### 2.4 Creación de pruebas cuando no existen (EXCEPCIÓN a la REGLA CERO)
+
+Por defecto, el agente es de solo lectura sobre el proyecto auditado. **Esta sección es la única excepción autorizada** y solo aplica cuando el usuario lo pide explícitamente para un proyecto específico.
+
+#### 2.4.1 Detección de pruebas existentes
+
+Antes de escribir cualquier prueba, verifica si existen:
+
+- `tests/Feature/` o `tests/Unit/` con archivos `*Test.php`
+- `phpunit.xml` o `phpunit.xml.dist`
+- `pest.php`
+
+Si existen pruebas, ejecútalas y evalúa normalmente. No crees pruebas nuevas.
+
+#### 2.4.2 Creación de pruebas (solo si no existen y con autorización explícita)
+
+Si el proyecto no tiene pruebas de PHPUnit/Pest y el usuario **explícitamente** pide crearlas:
+
+1. **Pide autorización explícita**: "¿Autorizas que cree pruebas de PHPUnit en el proyecto auditado? Esto modifica archivos del proyecto auditado y es una excepción a la regla de solo lectura."
+2. Si el usuario dice que no, marca como `bloqueada` con el motivo y no escribas nada.
+3. Si el usuario dice que sí:
+   - Crea `tests/Feature/ExampleTest.php` y `tests/Unit/ExampleTest.php` siguiendo la estructura de Laravel 13.
+   - Crea pruebas básicas para las rutas principales (home, contacto, etc.) usando `get()` y `assertStatus(200)`.
+   - Crea pruebas de modelo para los modelos principales usando factories o creación directa.
+   - No modifiques código existente del proyecto, solo agrega archivos de prueba nuevos.
+   - Ejecuta `php artisan test --without-tty` y reporta resultados.
+   - Si hay Xdebug/PCOV, ejecuta cobertura con `--coverage-clover <temp>/coverage.xml`.
+
+#### 2.4.3 Evaluación
+
+- Reporta: tests totales, aprobados, fallidos, omitidos, tiempo.
+- Cada prueba que falle es un hallazgo de calidad (QAL-###).
+- Las pruebas creadas por el agente deben declararse como tales en el informe.
+
+
+#### 2.4.4 Instalación y ejecución de herramientas de análisis estático (EXCEPCIÓN a la REGLA CERO)
+
+Si no existen herramientas de análisis estático (phpstan, psalm) y el proyecto carece de análisis de código estático:
+
+1. **Pide autorización explícita para instalar**: "¿Autorizas que instale phpstan/psalm en el proyecto auditado? Esto modificará composer.json y composer.lock (agregará dependencias de desarrollo) y es una excepción a la regla de solo lectura."
+2. Si el usuario dice que no, marca como `bloqueada` con el motivo y no instales nada.
+3. Si el usuario dice que sí:
+   - Ejecuta `composer require --dev phpstan/phpstan` (o `vimeo/psalm` si phpstan no está disponible o el usuario prefiere psalm).
+   - Registra la versión instalada en el informe.
+4. **Pide autorización explícita para ejecutar**: "¿Autorizas que ejecute el análisis estático (phpstan/psalm) sobre el proyecto auditado? Esto ejecutará herramientas de análisis de código sobre el proyecto."
+5. Si el usuario dice que no, marca el análisis estático como `bloqueada` con el motivo y no ejecutes nada.
+6. Si el usuario dice que sí:
+   - Ejecuta `./vendor/bin/phpstan analyse --no-progress --error-format=json --level=max` (o `psalm --no-cache --output-format=json`).
+   - Reporta: errores encontrados, archivos analizados, nivel de severidad de cada hallazgo.
+   - Cada error de análisis estático es un hallazgo de calidad (QAL-###).
+   - Las herramientas instaladas por el agente deben declararse como tales en el informe.
+
+
 ### 2.4 Mapeo ISO 25010
 
 Puntúa y justifica: adecuación funcional, eficiencia de desempeño, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad, portabilidad.

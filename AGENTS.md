@@ -46,6 +46,11 @@ no existiera al arrancar la sesión.
 - **Solo lectura sobre el proyecto auditado.** OpenCode: `permission.edit` permite únicamente `reports/**` y
   `scope/authorization.draft.md`. `scope/authorization.md` está fuera del permiso a propósito: lo firma y
   lo nombra el responsable humano, y el agente no puede autorizarse a sí mismo. No lo amplíes sin justificarlo.
+- **EXCEPCIÓN — Creación de pruebas de PHPUnit:** si el proyecto no tiene pruebas y el usuario lo pide
+  explícitamente, el agente sec-quality puede crear archivos nuevos en `tests/Feature/` y `tests/Unit/`
+  (solo crear, nunca editar código existente). Es la única excepción a la regla de solo lectura y requiere
+  autorización explícita del usuario para el proyecto específico.
+- **EXCEPCIÓN — Instalación y ejecución de herramientas de análisis estático (phpstan/psalm):** si el proyecto no tiene estas herramientas y el usuario lo pide explícitamente, el agente sec-quality puede instalarlas con `composer require --dev` y ejecutar el análisis estático sobre el proyecto. Es una excepción a la regla de solo lectura y requiere autorización explícita del usuario para el proyecto específico.
 - **Bash restringido** (OpenCode): se deniegan `rm`/`del`/`Remove-Item`, `git commit|push|checkout|reset|clean|stash|apply|merge|rebase`,
   `composer require|update`, y `php artisan migrate|db:*|key:generate|*:cache|optimize|storage:link`,
   incluida la forma con ruta absoluta (`*artisan migrate*`) porque `php artisan …*` no la cubre.

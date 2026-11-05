@@ -101,6 +101,15 @@ funcional es la puerta de firma — sin sección 9 completa y sin el aviso de bo
 fase. En Claude Code y en Codex la barrera de rutas y el sandbox de Codex sí se aplican a nivel de
 proceso.
 
+**Excepción a la REGLA CERO — Creación de pruebas de PHPUnit:**
+Si el proyecto auditado no tiene pruebas de PHPUnit/Pest y el usuario lo pide explícitamente, el
+subagente sec-quality puede crear archivos nuevos en `tests/Feature/` y `tests/Unit/` (solo crear,
+nunca editar código existente del proyecto). Esta es la única excepción a la regla de solo lectura y
+requiere autorización explícita del usuario para el proyecto específico.
+
+**Excepción a la REGLA CERO — Instalación y ejecución de herramientas de análisis estático (phpstan/psalm):**
+Si el proyecto auditado no tiene herramientas de análisis estático y el usuario lo pide explícitamente, el subagente sec-quality puede instalarlas con `composer require --dev` y ejecutar el análisis estático sobre el proyecto. Es una excepción a la regla de solo lectura y requiere autorización explícita del usuario para el proyecto específico.
+
 Si necesitas ampliar lo que el agente puede hacer, edita los permisos en `agents/*.md` y vuelve a desplegar.
 
 ## Flujo de entrega de remediación
