@@ -52,7 +52,7 @@ try {
     Check ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq $null) 'el generador termina sin error'
 
     $generated = @(Get-ChildItem -LiteralPath $outDir -Recurse -File)
-    Check ($generated.Count -eq 12) "12 artefactos generados (encontrados: $($generated.Count))"
+    Check ($generated.Count -eq 16) "16 artefactos generados (encontrados: $($generated.Count))"
 
     # --- S10: encoding -------------------------------------------------------
     Write-Output '== S10 encoding =='
@@ -77,7 +77,7 @@ try {
     # --- S3: variantes de Claude Code ---------------------------------------
     Write-Output '== S3 y S4 Claude Code =='
     $claudeFiles = @(Get-ChildItem -LiteralPath (Join-Path $outDir 'claude\agents') -Filter '*.md' -File)
-    Check ($claudeFiles.Count -eq 5) "5 variantes de Claude (encontradas: $($claudeFiles.Count))"
+    Check ($claudeFiles.Count -eq 7) "7 variantes de Claude (encontradas: $($claudeFiles.Count))"
     foreach ($file in $claudeFiles) {
         $text = Read-Utf8Text -Path $file.FullName
         $closeIdx = $text.IndexOf("`n---`n", 3)
@@ -92,23 +92,24 @@ try {
     }
 
     $orchestrator = Read-Utf8Text -Path (Join-Path $outDir 'claude\agents\laravel-sec-auditor.md')
-    Check ($orchestrator -match 'tools: Agent\(sec-static, sec-config, sec-dynamic, sec-quality\)') 'el orquestador limita la delegación a los 4 subagentes'
+    Check ($orchestrator -match 'tools: Agent\(sec-static, sec-config, sec-dynamic, sec-quality, sec-idor, sec-tests\)') 'el orquestador limita la delegación a los 6 subagentes'
 
     $template = Read-Utf8Text -Path (Join-Path $repoRoot 'claude\settings.template.json')
     $settings = $template | ConvertFrom-Json
     $denyRules = @($settings.permissions.deny)
     $allowRules = @($settings.permissions.allow)
-    Check ($denyRules.Count -eq 99) "99 reglas deny (encontradas: $($denyRules.Count))"
-    Check ($allowRules.Count -eq 2) "2 reglas allow (encontradas: $($allowRules.Count))"
-    Check (@($allowRules | Where-Object { $_ -like '*authorization.draft.md*' }).Count -eq 1) 'allow incluye el borrador de autorización'
-    Check (@($denyRules | Where-Object { $_ -eq 'Edit(./scope/authorization.md)' }).Count -eq 1) 'deny bloquea la autorización firmada'
+    Check ($denyRules.Count -eq 100) "100 reglas deny (encontradas: $($denyRules.Count))"
+    Check ($allowRules.Count -eq 1) "1 regla allow (encontrada: $($allowRules.Count))"
+    Check (@($allowRules | Where-Object { $_ -eq 'Edit(./sectest/**)' }).Count -eq 1) 'allow confina la escritura a sectest/'
+    Check (@($denyRules | Where-Object { $_ -eq 'Edit(./sectest/scope/authorization.md)' }).Count -eq 1) 'deny bloquea la autorización firmada'
+    Check (@($denyRules | Where-Object { $_ -eq 'Edit(./sectest/tools/composer.lock)' }).Count -eq 1) 'deny protege el lock de herramientas'
     $deadRules = @($denyRules | Where-Object { $_ -match '^(Write|Glob|NotebookEdit|MultiEdit)\(' })
     Check ($deadRules.Count -eq 0) 'ninguna regla de ruta que Claude Code ignore'
 
     # --- S5 y S7: Codex ------------------------------------------------------
     Write-Output '== S5 y S7 Codex =='
     $tomlFiles = @(Get-ChildItem -LiteralPath (Join-Path $outDir 'codex\agents') -Filter '*.toml' -File)
-    Check ($tomlFiles.Count -eq 4) "4 subagentes TOML (encontrados: $($tomlFiles.Count))"
+    Check ($tomlFiles.Count -eq 6) "6 subagentes TOML (encontrados: $($tomlFiles.Count))"
     foreach ($file in $tomlFiles) {
         $text = Read-Utf8Text -Path $file.FullName
         Check ($text -match '(?m)^name = "') "name TOML: $($file.Name)"
@@ -121,11 +122,12 @@ try {
     $configToml = Read-Utf8Text -Path (Join-Path $outDir 'codex\project-kit\.codex\config.toml')
     Check ($configToml -match '(?m)^default_permissions = "laravel-audit"') 'perfil por defecto laravel-audit'
     Check ($configToml -match '(?m)^extends = ":read-only"') 'el perfil parte de :read-only'
-    Check ($configToml -match '(?m)^"reports" = "write"') 'escritura permitida en reports'
-    Check ($configToml -match '(?m)^"scope/authorization.draft.md" = "write"') 'escritura permitida en el borrador'
-    Check ($configToml -notmatch '(?m)^"scope/authorization\.md" = "write"') 'la autorización firmada sigue en solo lectura'
+    Check ($configToml -match '(?m)^"sectest" = "write"') 'Codex permite escribir en sectest/'
+    Check ($configToml -match '(?m)^"sectest/scope/authorization.md" = "read"') 'Codex deja la autorización firmada en solo lectura'
+    Check ($configToml -notmatch '(?m)^"reports" = "write"') 'Codex ya no escribe en reports/ de la raíz'
     Check ($configToml -notmatch '(?m)^\s*sandbox_mode\s*=') 'no mezcla sandbox_mode con perfiles'
     Check ($configToml -notmatch '//') 'usa comentarios # y no //'
+    Check ($configToml -match '(?m)^"sectest" = "write"') 'Codex permite crear claves de credenciales en sectest/'
 
     $rulesFile = Read-Utf8Text -Path (Join-Path $outDir 'codex\project-kit\.codex\rules\laravel-audit.rules')
     $ruleCount = ([regex]::Matches($rulesFile, 'prefix_rule\(')).Count
@@ -137,14 +139,113 @@ try {
     $opencode = Read-Utf8Text -Path (Join-Path $repoRoot 'agents\laravel-sec-auditor.md')
     $ocClose = $opencode.IndexOf("`n---`n", 3)
     $ocFront = if ($ocClose -gt 0) { $opencode.Substring(4, $ocClose - 4) } else { '' }
-    Check ($ocFront -match 'scope/authorization\.draft\.md') 'OpenCode permite escribir el borrador'
-    Check ($ocFront -cnotmatch 'scope/authorization\.md"') 'OpenCode no permite escribir la autorización firmada'
+    Check ($ocFront -match '"sectest/\*\*": allow') 'OpenCode confina la escritura a sectest/'
+    Check ($ocFront -match '"sectest/scope/authorization\.md": deny') 'OpenCode deniega la autorización firmada'
     Check ($opencode -match 'Paso 0') 'el prompt define el Paso 0'
-    Check ($opencode -match 'authorization\.draft\.md') 'el Paso 0 escribe el borrador, no la autorización'
+    Check ($opencode -match 'sectest/scope/authorization\.draft\.md') 'el Paso 0 escribe el borrador, no la autorización'
     Check ($opencode -cnotmatch 'authorization\.template\.md') 'no queda ninguna referencia a la plantilla antigua'
     Check ($ocFront -match '\*authorization\.md\*') 'bash bloquea cualquier comando que mencione la autorización firmada'
     Check ($opencode -notmatch '\| Staging \| PENDIENTE \| Sí \|') 'el esqueleto no afirma que staging esté autorizado'
     Check ($opencode -match 'Seguridad \(SEG\) ≥ PENDIENTE') 'el esqueleto deja los umbrales en PENDIENTE'
+
+    # --- S11/S12/S13: coherencia entre permisos y texto ----------------------
+    Write-Output '== S11 coherencia de permisos =='
+    $agentFiles = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'agents') -Filter '*.md' -File | Sort-Object Name)
+    Check ($agentFiles.Count -eq 7) "7 agentes en agents\ (encontrados: $($agentFiles.Count))"
+
+    $bashBlocks = @{}
+    $bodies = @{}
+    foreach ($agentFile in $agentFiles) {
+        $raw = (Read-Utf8Text -Path $agentFile.FullName).Replace("`r`n", "`n")
+        $close = $raw.IndexOf("`n---`n", 3)
+        $front = if ($close -gt 0) { $raw.Substring(4, $close - 4) } else { throw "Frontmatter sin cierre: $($agentFile.Name)" }
+        $body = if ($close -gt 0) { $raw.Substring($close + 5) } else { '' }
+        $bodies[$agentFile.BaseName] = $body
+
+        $bashMatch = [regex]::Match($front, '(?m)^  bash:\n(.*?)(?=^  \S|\z)', 'Singleline')
+        if (-not $bashMatch.Success) { throw "Sin bloque bash en $($agentFile.Name)" }
+        $bashBlocks[$agentFile.BaseName] = ($bashMatch.Groups[1].Value -replace '\s+', ' ').Trim()
+    }
+
+    $distinctBash = @($bashBlocks.Values | Sort-Object -Unique)
+    Check ($distinctBash.Count -eq 1) "el bloque bash es identico en los 7 agentes (variantes: $($distinctBash.Count))"
+
+    Write-Output '== S12 texto no promete lo que el permiso niega =='
+    foreach ($name in $bodies.Keys) {
+        $body = $bodies[$name]
+        Check ($body -notmatch 'composer require --dev') "sin orden de instalar con composer require: $name"
+        Check ($body -match 'sectest/') "acota la escritura a sectest/: $name"
+    }
+
+    Write-Output '== S13 contrato con metricas crudas =='
+    $orchestratorBody = $bodies['laravel-sec-auditor']
+    $contractSection = [regex]::Match($orchestratorBody, '(?s)## 5\. Contrato de resumen.*?(?=### 5\.1)').Value
+    Check ($contractSection.Length -gt 0) 'la seccion 5 del contrato existe'
+    Check ($contractSection -match '"metricas"') 'el contrato incluye metricas crudas'
+    Check ($contractSection -notmatch '"dimensiones"') 'el contrato de subagente no incluye dimensiones'
+    Check ($orchestratorBody -match 'Comprueba la vigencia contra el reloj') 'el orquestador valida la ventana temporal'
+    Check ($orchestratorBody -match 'A01-SEC-###') 'el orquestador define el namespace de IDs'
+    foreach ($sub in @('sec-static', 'sec-config', 'sec-dynamic', 'sec-quality')) {
+        Check ($bodies[$sub] -match '`metricas`') "el subagente reporta metricas: $sub"
+        Check ($bodies[$sub] -notmatch 'dimensiones\{') "el subagente no define claves de dimensiones: $sub"
+    }
+
+    Write-Output '== S14 validador de contratos =='
+    $schemaDir = Join-Path $repoRoot 'schemas'
+    Check (Test-Path -LiteralPath (Join-Path $schemaDir 'subagent-summary.schema.json')) 'existe el esquema de subagente'
+    Check (Test-Path -LiteralPath (Join-Path $schemaDir 'resumen.schema.json')) 'existe el esquema de resumen'
+    foreach ($schemaFile in @(Get-ChildItem -LiteralPath $schemaDir -Filter '*.json' -File)) {
+        $parsed = $null
+        try { $parsed = Read-Utf8Text -Path $schemaFile.FullName | ConvertFrom-Json } catch { }
+        Check ($null -ne $parsed) "el esquema es JSON valido: $($schemaFile.Name)"
+    }
+
+    $validator = Join-Path $repoRoot 'tools\validate-reports.ps1'
+    Check (Test-Path -LiteralPath $validator) 'existe tools\validate-reports.ps1'
+    $validDir = Join-Path $repoRoot 'tools\tests\fixtures\valid'
+    $invalidDir = Join-Path $repoRoot 'tools\tests\fixtures\invalid'
+    & $validator -ReportsDir $validDir | Out-Null
+    Check ($LASTEXITCODE -eq 0) 'el validador acepta las fixtures validas'
+    & $validator -ReportsDir $invalidDir | Out-Null
+    Check ($LASTEXITCODE -eq 1) 'el validador rechaza las fixtures invalidas'
+
+    Write-Output '== S15 almacen de credenciales =='
+    $credTemplate = Join-Path $repoRoot 'templates\credentials.conf.example'
+    Check (Test-Path -LiteralPath $credTemplate) 'existe templates\credentials.conf.example'
+    if (Test-Path -LiteralPath $credTemplate) {
+        $credText = Read-Utf8Text -Path $credTemplate
+        foreach ($key in @('SECTEST_ANON_ENABLED', 'SECTEST_USER_USERNAME', 'SECTEST_USER_PASSWORD', 'SECTEST_ADMIN_USERNAME', 'SECTEST_ADMIN_PASSWORD', 'SECTEST_USER_PASSWORD_REF', 'SECTEST_ADMIN_PASSWORD_REF')) {
+            Check ($credText -match ('(?m)^' + $key + '=')) "la plantilla define $key"
+        }
+        Check ($credText -notmatch '(?m)^SECTEST_(USER|ADMIN)_PASSWORD=.+') 'la plantilla no trae valores cargados'
+        Check ($credText -match 'credentials\.conf') 'la plantilla se documenta como scope/credentials.conf'
+    }
+
+    $orchCred = $bodies['laravel-sec-auditor']
+    Check ($orchCred -match 'scope/credentials\.conf') 'el orquestador usa scope/credentials.conf'
+    foreach ($key in @('SECTEST_USER_USERNAME', 'SECTEST_USER_PASSWORD', 'SECTEST_ADMIN_USERNAME', 'SECTEST_ADMIN_PASSWORD')) {
+        Check ($orchCred -match $key) "el esqueleto embebido incluye $key"
+    }
+    Check ($orchCred -match '--netrc-file') 'el orquestador resuelve el secreto por archivo'
+    Check ($orchCred -match 'curl -u') 'el orquestador nombra y prohibe curl -u'
+    Check ($orchCred -match 'no la usas') 'el orquestador rechaza secretos pegados en el chat'
+    Check ($orchCred -match 'SECTEST_<FAMILIA>_<CAMPO>') 'el orquestador crea claves nuevas con convencion'
+
+    $dynCred = $bodies['sec-dynamic']
+    Check ($dynCred -match '--netrc-file') 'sec-dynamic resuelve el secreto por archivo'
+    Check ($dynCred -match 'SECTEST_<FAMILIA>_<CAMPO>') 'sec-dynamic sabe crear claves faltantes'
+
+    $ocOrch = Read-Utf8Text -Path (Join-Path $repoRoot 'agents\laravel-sec-auditor.md')
+    $ocOrchClose = $ocOrch.IndexOf("`n---`n", 3)
+    $ocOrchFront = if ($ocOrchClose -gt 0) { $ocOrch.Substring(4, $ocOrchClose - 4) } else { '' }
+    Check ($ocOrchFront -match '"sectest/\*\*": allow') 'OpenCode permite crear claves de credenciales dentro de sectest/'
+
+    foreach ($sub in @('sec-static', 'sec-config', 'sec-quality', 'sec-idor', 'sec-tests')) {
+        $subRaw = Read-Utf8Text -Path (Join-Path $repoRoot "agents\$sub.md")
+        $subClose = $subRaw.IndexOf("`n---`n", 3)
+        $subFront = if ($subClose -gt 0) { $subRaw.Substring(4, $subClose - 4) } else { '' }
+        Check ($subFront -cnotmatch 'credentials\.conf') "sin permiso de credenciales innecesario: $sub"
+    }
 
     # --- S8: deploy.ps1 ------------------------------------------------------
     Write-Output '== S8 deploy.ps1 =='

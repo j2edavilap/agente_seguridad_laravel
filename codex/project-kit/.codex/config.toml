@@ -11,7 +11,7 @@
 default_permissions = "laravel-audit"
 
 [permissions.laravel-audit]
-description = "Auditoría Laravel de solo lectura: escritura únicamente en reports/ y scope/authorization.draft.md."
+description = "Auditoría Laravel: escritura únicamente en sectest/ (informes, pruebas y herramientas), con la autorización firmada en solo lectura."
 extends = ":read-only"
 
 [permissions.laravel-audit.filesystem]
@@ -23,8 +23,9 @@ glob_scan_max_depth = 3
 # scope/authorization.md NO aparece: hereda el "read" de "." y el agente nunca puede autorizarse solo.
 [permissions.laravel-audit.filesystem.":workspace_roots"]
 "." = "read"
-"reports" = "write"
-"scope/authorization.draft.md" = "write"
+"sectest" = "write"
+# La autorización firmada queda en solo lectura aunque viva dentro de sectest/.
+"sectest/scope/authorization.md" = "read"
 
 # Las pruebas dinámicas necesitan salir a staging.
 # Los dominios de permiso solo se aplican si además se activa [features] network_proxy = true.

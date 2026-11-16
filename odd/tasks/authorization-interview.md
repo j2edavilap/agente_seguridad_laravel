@@ -7,12 +7,12 @@ Test runner: `powershell -ExecutionPolicy Bypass -File .\tools\tests\verify-vari
 
 ## Specs
 
-- **S1 — Interview first.** Before any other action (no file exploration, no project command, no subagent), if `scope/authorization.md` is missing or incomplete the orchestrator asks the human for the authorization data in ONE numbered message.
-- **S2 — Draft, never the real file.** The agent writes `scope/authorization.draft.md`. It must never create, edit or overwrite `scope/authorization.md`. Activation of the audit requires a human rename plus signature. (User decision, 2026-11-03.)
+- **S1 — Interview first.** Before any other action (no file exploration, no project command, no subagent), if `sectest/scope/authorization.md` is missing or incomplete the orchestrator asks the human for the authorization data in ONE numbered message.
+- **S2 — Draft, never the real file.** The agent writes `sectest/scope/authorization.draft.md`. It must never create, edit or overwrite `sectest/scope/authorization.md`. Activation of the audit requires a human rename plus signature. (User decision, 2026-11-03.)
 - **S3 — Self-contained.** The interview questions and the full Markdown skeleton live inside `agents/laravel-sec-auditor.md`. The agent must not read `templates/` at runtime.
 - **S4 — No fabrication.** Missing answers are recorded as `PENDIENTE`, never invented. Production is always `Nunca`. Signature fields are always left empty. Checkboxes are marked only on explicit human authorization. Secrets are never requested in clear.
-- **S5 — Write barrier in all three runtimes.** The allowed write surface becomes `reports/**` + `scope/authorization.draft.md`. The real `scope/authorization.md` is explicitly denied or read-only in OpenCode, Claude Code and Codex.
-- **S6 — Activation gate.** No phase runs unless `scope/authorization.md` exists, does not say `Estado: BORRADOR`, the 5 validated fields are complete and the signature block is filled.
+- **S5 — Write barrier in all three runtimes.** The allowed write surface becomes `sectest/reports/**` + `sectest/scope/authorization.draft.md`. The real `sectest/scope/authorization.md` is explicitly denied or read-only in OpenCode, Claude Code and Codex.
+- **S6 — Activation gate.** No phase runs unless `sectest/scope/authorization.md` exists, does not say `Estado: BORRADOR`, the 5 validated fields are complete and the signature block is filled.
 - **S7 — Idempotence.** An existing signed authorization is used as-is and never touched. An existing draft is only rewritten after the human confirms.
 - **S8 — Propagated and tested.** Docs, template and the structural regression are updated; the three runtimes are regenerated and reinstalled.
 
@@ -29,11 +29,11 @@ Test runner: `powershell -ExecutionPolicy Bypass -File .\tools\tests\verify-vari
 
 L1 — (user) "quiero que el agente tenga un paso inicial en el cual pida los permisos he informacion necesaria para generar el archivo con toda la informacion necesaria"
 
-L2 — (user, decision) Chose "Borrador + rename manual": the agent writes `scope/authorization.draft.md`; the human reviews, signs and saves it as `scope/authorization.md`. Rationale given: writing the same file the agent later validates would let it authorize itself.
+L2 — (user, decision) Chose "Borrador + rename manual": the agent writes `sectest/scope/authorization.draft.md`; the human reviews, signs and saves it as `sectest/scope/authorization.md`. Rationale given: writing the same file the agent later validates would let it authorize itself.
 
 L3 — Constraint from `AGENTS.md`: agents are self-contained, so the interview and skeleton are embedded in the prompt and propagated by `tools/build-variants.ps1`; `templates/` is not read at runtime.
 
-L4 — Blocker B1 (encontrado en la verificación independiente): `permission.bash` de OpenCode permite todo salvo una denegación, así que el agente podía escribir `scope/authorization.md` por comandos. Corregido: regla `"*authorization.md*": deny` al final del bloque bash (gana por "último match gana"), no afecta al borrador (`authorization.draft.md` no contiene esa subcadena), y documentado el límite honesto de OpenCode (no es un sandbox; la garantía funcional es la puerta de firma) en `README.md`, `AGENTS.md` y `reference/01-reglas-y-flujo.md`.
+L4 — Blocker B1 (encontrado en la verificación independiente): `permission.bash` de OpenCode permite todo salvo una denegación, así que el agente podía escribir `sectest/scope/authorization.md` por comandos. Corregido: regla `"*authorization.md*": deny` al final del bloque bash (gana por "último match gana"), no afecta al borrador (`authorization.draft.md` no contiene esa subcadena), y documentado el límite honesto de OpenCode (no es un sandbox; la garantía funcional es la puerta de firma) en `README.md`, `AGENTS.md` y `reference/01-reglas-y-flujo.md`.
 
 L5 — Blocker B2: el esqueleto incrustado pre-llenaba valores no consensuados (`Sí` en staging, `≥ 80/85/75` en umbrales, zona horaria por defecto). Corregido: todo queda en `PENDIENTE` salvo límites fijos; los cuatro `[x]` de la sección 7 y el `Nunca` de producción se justifican explícitamente como límites fijos del agente, no autorizaciones del humano.
 

@@ -27,7 +27,9 @@ $required = @(
     'sec-static',
     'sec-config',
     'sec-dynamic',
-    'sec-quality'
+    'sec-quality',
+    'sec-idor',
+    'sec-tests'
 )
 
 function Read-Utf8Text {
@@ -154,7 +156,7 @@ foreach ($name in $required) {
 }
 
 $codexTarget = Join-Path $env:USERPROFILE '.codex\agents'
-foreach ($name in @('sec-static', 'sec-config', 'sec-dynamic', 'sec-quality')) {
+foreach ($name in @('sec-static', 'sec-config', 'sec-dynamic', 'sec-quality', 'sec-idor', 'sec-tests')) {
     $p = Join-Path $codexTarget "$name.toml"
     if (-not (Test-Path -LiteralPath $p)) { $errors.Add("Codex: falta $name.toml"); continue }
     $text = Read-Utf8Text -Path $p

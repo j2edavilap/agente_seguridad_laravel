@@ -20,11 +20,11 @@ Penalización por hallazgo confirmado:
 | Bajo | 1 |
 | Informativo | 0 |
 
-Los `falsos positivos` y los `probables` no penalizan como confirmados; los probables se listan como riesgo residual.
+Los `falsos positivos` y los `probables` no penalizan como confirmados; los probables se listan como riesgo residual. Un **probable de severidad crítica** no penaliza SEG pero impide el veredicto `aprobado`.
 
-`penalización(no probados) = min(10, 0.5 × controles_aplicables_no_probados)` — valor por defecto documentado; ajustable en `scope/authorization.md`.
+`penalización(no probados) = min(10, 0.5 × controles_aplicables_no_probados)` — valor por defecto documentado; ajustable en `sectest/scope/authorization.md`.
 
-Límite inferior: 0.
+Límite inferior: 0. Redondeo: una décima, half-up.
 
 ### CI — Control de información
 
@@ -36,6 +36,7 @@ CI = Σ (peso_activo × cumple_control) / Σ peso_activo × 100
 - `peso_activo`: criticidad del activo afectado (alto 3, medio 2, bajo 1).
 - Un control no probado cuenta como `cumple = 0` y se declara en `bloqueos`.
 - Los controles no aplicables se excluyen del denominador y se listan.
+- Denominador 0 (ningún control aplicable) ⇒ `CI = null` y la dimensión es `no_evaluable`.
 
 ### CS — Calidad de software
 
@@ -46,7 +47,41 @@ CS = 0.25 × cobertura_pruebas
    + 0.25 × estándares_código
 ```
 
-Cada componente se normaliza a 0–100 con la evidencia del subagente `sec-quality` (ISO 25010 / 29119-3).
+Cada componente se normaliza a 0–100 con evidencia medida, no con impresiones (ISO 25010 / 29119-3):
+
+| Componente | Peso | Entrada | Normalización |
+|---|---|---|---|
+| Cobertura de pruebas | 0.25 | `metricas.cobertura_lineas_pct` | el propio porcentaje |
+| Mantenibilidad | 0.25 | `metricas.errores_estaticos` / `metricas.kloc_analizado` | banda de errores/KLOC |
+| Fiabilidad | 0.25 | `pruebas_aprobadas_n` / `pruebas_totales` | `100 × aprobadas / totales` |
+| Estándares de código | 0.25 | `metricas.violaciones_estilo` | banda de violaciones |
+
+Banda de mantenibilidad (errores estáticos por KLOC):
+
+| errores/KLOC | puntuación |
+|---|---|
+| 0 | 100 |
+| ≤ 5 | 90 |
+| ≤ 20 | 75 |
+| ≤ 50 | 55 |
+| ≤ 100 | 35 |
+| > 100 | 15 |
+
+Banda de estándares (violaciones de estilo con `--test` / `--dry-run`):
+
+| violaciones | puntuación |
+|---|---|
+| 0 | 100 |
+| ≤ 10 | 85 |
+| ≤ 50 | 65 |
+| ≤ 200 | 40 |
+| > 200 | 20 |
+
+Componente no medible ⇒ `null` y **re-normalización del peso entre los medibles**. No se sustituye por
+cero. Si los cuatro son `null`, `CS = null` y la dimensión es `no_evaluable`.
+
+Casos límite: `kloc_analizado = 0` con cero errores ⇒ mantenibilidad 100; `kloc_analizado = 0` con
+errores > 0 ⇒ `null` (dato incoherente); `pruebas_totales = 0` ⇒ fiabilidad `null`.
 
 ## 2. Ejemplo trabajado
 
@@ -65,9 +100,10 @@ Con umbral SEG ≥ 80 → **condicionado** (si CI y CS cumplen y no hay crítico
 
 | Veredicto | Condición |
 |---|---|
-| Aprobado | SEG ≥ 80, CI ≥ 85, CS ≥ 75 y 0 críticos abiertos |
-| Condicionado | alguna dimensión entre 60 y su umbral, sin críticos |
-| Rechazado | cualquier dimensión < 60 **o** cualquier crítico confirmado |
+| **Aprobado** | SEG ≥ 80, CI ≥ 85, CS ≥ 75, 0 críticos confirmados y 0 críticos probables |
+| **Condicionado** | ninguna dimensión < 60, 0 críticos confirmados, y no cumple Aprobado |
+| **Rechazado** | cualquier dimensión < 60 **o** cualquier crítico confirmado |
+| **No evaluable** | dos o más dimensiones `null` |
 
 Los umbrales de la organización prevalecen si están en la autorización.
 

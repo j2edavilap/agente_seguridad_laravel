@@ -1,11 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Edit(./reports/**)",
-      "Edit(./scope/authorization.draft.md)"
+      "Edit(./sectest/**)"
     ],
     "deny": [
-      "Edit(./scope/authorization.md)",
+      "Edit(./sectest/scope/authorization.md)",
+      "Edit(./sectest/tools/composer.lock)",
       "Edit(./app/**)",
       "Edit(./bootstrap/**)",
       "Edit(./config/**)",

@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://local/schemas/resumen.schema.json",
+  "title": "Resumen consolidado de auditoria",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proyecto",
+    "version",
+    "fecha",
+    "por_subagente",
+    "hallazgos",
+    "dimensiones",
+    "no_evaluable",
+    "calculos",
+    "veredicto",
+    "spice",
+    "bloqueos",
+    "archivo_informe"
+  ],
+  "properties": {
+    "proyecto": { "type": "string" },
+    "version": { "type": "string" },
+    "fecha": { "type": "string" },
+    "ventana_autorizada": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inicio", "fin", "zona"],
+      "properties": {
+        "inicio": { "type": "string" },
+        "fin": { "type": "string" },
+        "zona": { "type": "string" }
+      }
+    },
+    "herramientas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nombre", "version", "ruta"],
+        "properties": {
+          "nombre": { "type": "string" },
+          "version": { "type": "string" },
+          "ruta": { "type": "string" }
+        }
+      }
+    },
+    "por_subagente": { "type": "array", "items": { "type": "object" } },
+    "hallazgos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["critico", "alto", "medio", "bajo", "informativo"],
+      "properties": {
+        "critico": { "type": "integer", "minimum": 0 },
+        "alto": { "type": "integer", "minimum": 0 },
+        "medio": { "type": "integer", "minimum": 0 },
+        "bajo": { "type": "integer", "minimum": 0 },
+        "informativo": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "dimensiones": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seguridad", "control_informacion", "calidad_software"],
+      "properties": {
+        "seguridad": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "control_informacion": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "calidad_software": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+      }
+    },
+    "no_evaluable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seguridad", "control_informacion", "calidad_software"],
+      "properties": {
+        "seguridad": { "type": "boolean" },
+        "control_informacion": { "type": "boolean" },
+        "calidad_software": { "type": "boolean" }
+      }
+    },
+    "calculos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seguridad", "control_informacion", "calidad_software"],
+      "properties": {
+        "seguridad": {
+          "type": "object",
+          "required": ["formula", "entradas", "resultado"],
+          "properties": {
+            "formula": { "type": "string" },
+            "entradas": { "type": "object" },
+            "componentes": { "type": "object" },
+            "resultado": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+          }
+        },
+        "control_informacion": {
+          "type": "object",
+          "required": ["formula", "entradas", "resultado"],
+          "properties": {
+            "formula": { "type": "string" },
+            "entradas": { "type": "object" },
+            "componentes": { "type": "object" },
+            "resultado": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+          }
+        },
+        "calidad_software": {
+          "type": "object",
+          "required": ["formula", "entradas", "resultado"],
+          "properties": {
+            "formula": { "type": "string" },
+            "entradas": { "type": "object" },
+            "componentes": { "type": "object" },
+            "resultado": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "veredicto": {
+      "type": "string",
+      "enum": ["aprobado", "condicionado", "rechazado", "no_evaluable"]
+    },
+    "spice": { "type": "array", "items": { "type": "object" } },
+    "bloqueos": { "type": "array" },
+    "archivo_informe": { "type": "string", "pattern": "^sectest/reports/" }
+  }
+}

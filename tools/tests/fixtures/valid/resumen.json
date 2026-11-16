@@ -1,0 +1,37 @@
+{
+  "proyecto": "demo-laravel",
+  "version": "abc1234",
+  "fecha": "2026-11-06T10:00:00-03:00",
+  "ventana_autorizada": { "inicio": "2026-11-06T08:00:00-03:00", "fin": "2026-11-06T18:00:00-03:00", "zona": "America/Santiago" },
+  "herramientas": [
+    { "nombre": "composer", "version": "2.7.0", "ruta": "composer.phar" }
+  ],
+  "por_subagente": [
+    { "subagente": "A-STATIC", "archivo_reporte": "sectest/reports/A-01-STATIC.md" }
+  ],
+  "hallazgos": { "critico": 0, "alto": 2, "medio": 3, "bajo": 1, "informativo": 0 },
+  "dimensiones": { "seguridad": 65, "control_informacion": 88.5, "calidad_software": 71.2 },
+  "no_evaluable": { "seguridad": false, "control_informacion": false, "calidad_software": false },
+  "calculos": {
+    "seguridad": {
+      "formula": "100 - P - B",
+      "entradas": { "critico": 0, "alto": 2, "medio": 3, "bajo": 1, "controles_no_probados": 4, "P": 33, "B": 2 },
+      "resultado": 65
+    },
+    "control_informacion": {
+      "formula": "100 * sum(peso*cumple) / sum(peso)",
+      "entradas": { "aplicables": 8, "conformes": 7 },
+      "resultado": 88.5
+    },
+    "calidad_software": {
+      "formula": "0.25*cobertura + 0.25*mantenibilidad + 0.25*fiabilidad + 0.25*estandares",
+      "entradas": { "cobertura": null, "mantenibilidad": 75, "fiabilidad": 71.4, "estandares": 65 },
+      "componentes": { "cobertura": null },
+      "resultado": 71.2
+    }
+  },
+  "veredicto": "condicionado",
+  "spice": [],
+  "bloqueos": [],
+  "archivo_informe": "sectest/reports/INFORME_FINAL.md"
+}

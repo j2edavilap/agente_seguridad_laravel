@@ -133,7 +133,7 @@ function Invoke-Replacements {
 # 'Agent(tipo, ...)' solo se aplica al agente que corre como hilo principal con `claude --agent`.
 
 $readOnlyTools   = 'Read, Grep, Glob, Bash, PowerShell, Edit, Write, TodoWrite'
-$orchestratorTools = 'Agent(sec-static, sec-config, sec-dynamic, sec-quality), Read, Grep, Glob, Bash, PowerShell, Edit, Write, TodoWrite, WebFetch'
+$orchestratorTools = 'Agent(sec-static, sec-config, sec-dynamic, sec-quality, sec-idor, sec-tests), Read, Grep, Glob, Bash, PowerShell, Edit, Write, TodoWrite, WebFetch'
 
 $agentConfig = @{
     'laravel-sec-auditor' = @{ ClaudeTools = $orchestratorTools; CodexSubagent = $false }
@@ -141,6 +141,8 @@ $agentConfig = @{
     'sec-config'          = @{ ClaudeTools = $readOnlyTools;     CodexSubagent = $true }
     'sec-dynamic'         = @{ ClaudeTools = $readOnlyTools;     CodexSubagent = $true }
     'sec-quality'         = @{ ClaudeTools = $readOnlyTools;     CodexSubagent = $true }
+    'sec-idor'            = @{ ClaudeTools = $readOnlyTools;     CodexSubagent = $true }
+    'sec-tests'           = @{ ClaudeTools = $readOnlyTools;     CodexSubagent = $true }
 }
 
 # --- Sustituciones por runtime ---------------------------------------------
@@ -153,7 +155,7 @@ $claudeSubs = @(
 
 $codexSubs = @(
     @('delegas con la herramienta `task` usando estos `subagent_type`',
-      'delegas a los subagentes de Codex por nombre —`sec-static`, `sec-config`, `sec-dynamic`, `sec-quality`— definidos en `~/.codex/agents/`'),
+      'delegas a los subagentes de Codex por nombre -`sec-static`, `sec-config`, `sec-dynamic`, `sec-quality`, `sec-idor`, `sec-tests`- definidos en `~/.codex/agents/`'),
     @('`webfetch`', 'la herramienta de fetch web del cliente')
 )
 
@@ -166,7 +168,7 @@ if (-not (Test-Path -LiteralPath $SourceDir)) {
 $files = @(Get-ChildItem -LiteralPath $SourceDir -Filter '*.md' -File | Sort-Object Name)
 if ($files.Count -eq 0) { throw "No hay archivos .md en $SourceDir" }
 
-$required = @('laravel-sec-auditor', 'sec-static', 'sec-config', 'sec-dynamic', 'sec-quality')
+$required = @('laravel-sec-auditor', 'sec-static', 'sec-config', 'sec-dynamic', 'sec-quality', 'sec-idor', 'sec-tests')
 $found = @($files.BaseName)
 $missing = @($required | Where-Object { $found -notcontains $_ })
 if ($missing.Count -gt 0) {
@@ -237,7 +239,7 @@ foreach ($file in $files) {
             '# Protocolo de auditoría de seguridad — Laravel 13 / PHP 8.5'
             ''
             'Este archivo se copia en la **raíz del proyecto auditado**. Codex lo carga como instrucciones'
-            'del proyecto. Los subagentes `sec-static`, `sec-config`, `sec-dynamic` y `sec-quality` están'
+            'del proyecto. Los subagentes `sec-static`, `sec-config`, `sec-dynamic`, `sec-quality`, `sec-idor` y'
             'definidos globalmente en `~/.codex/agents/`.'
             ''
             'El perfil de permisos `laravel-audit` de `.codex/config.toml` es la barrera real de solo'

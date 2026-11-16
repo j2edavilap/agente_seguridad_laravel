@@ -120,7 +120,7 @@ El agente marca `aprobada`, `fallida` o `bloqueada`; nunca deja una fila sin est
 
 ## F. Trazabilidad mínima por hallazgo
 
-Todo hallazgo debe declarar: ID, título, severidad CVSS, estado, OWASP/CWE, ubicación exacta, evidencia enmascarada, reproducción, remediación, ISO 27001, ISO 25010, ISO 29119-4, esfuerzo, responsable.
+Todo hallazgo debe declarar: ID, título, severidad CVSS, estado, OWASP/CWE, ubicación exacta, evidencia enmascarada, por qué es un problema, ISO 27001, ISO 25010 e ISO 29119-4. Sin solución, sin esfuerzo y sin responsable.
 
 ## G. Nuevos vectores de ataque y defensas requeridas
 

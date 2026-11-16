@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://local/schemas/subagent-summary.schema.json",
+  "title": "Contrato de resumen de subagente",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "subagente",
+    "fase",
+    "pruebas_ejecutadas",
+    "pruebas_aprobadas",
+    "pruebas_fallidas",
+    "pruebas_bloqueadas",
+    "hallazgos",
+    "hallazgos_confirmados",
+    "confirmados",
+    "falsos_positivos",
+    "metricas",
+    "ids_hallazgos",
+    "archivo_reporte"
+  ],
+  "properties": {
+    "subagente": {
+      "type": "string",
+      "enum": ["A-STATIC", "A-CONFIG", "A-DYNAMIC", "A-QUALITY"]
+    },
+    "fase": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(,[a-z0-9]+)*$"
+    },
+    "pruebas_ejecutadas": { "type": "integer", "minimum": 0 },
+    "pruebas_aprobadas": { "type": "integer", "minimum": 0 },
+    "pruebas_fallidas": { "type": "integer", "minimum": 0 },
+    "pruebas_bloqueadas": { "type": "integer", "minimum": 0 },
+    "hallazgos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["critico", "alto", "medio", "bajo", "informativo"],
+      "properties": {
+        "critico": { "type": "integer", "minimum": 0 },
+        "alto": { "type": "integer", "minimum": 0 },
+        "medio": { "type": "integer", "minimum": 0 },
+        "bajo": { "type": "integer", "minimum": 0 },
+        "informativo": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "hallazgos_confirmados": { "type": "integer", "minimum": 0 },
+    "confirmados": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["critico", "alto", "medio", "bajo", "informativo"],
+      "properties": {
+        "critico": { "type": "integer", "minimum": 0 },
+        "alto": { "type": "integer", "minimum": 0 },
+        "medio": { "type": "integer", "minimum": 0 },
+        "bajo": { "type": "integer", "minimum": 0 },
+        "informativo": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "falsos_positivos": { "type": "integer", "minimum": 0 },
+    "metricas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cobertura_lineas_pct",
+        "pruebas_totales",
+        "pruebas_aprobadas_n",
+        "errores_estaticos",
+        "kloc_analizado",
+        "violaciones_estilo",
+        "controles_aplicables",
+        "controles_conformes",
+        "controles_no_probados"
+      ],
+      "properties": {
+        "cobertura_lineas_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "pruebas_totales": { "type": ["integer", "null"], "minimum": 0 },
+        "pruebas_aprobadas_n": { "type": ["integer", "null"], "minimum": 0 },
+        "errores_estaticos": { "type": ["integer", "null"], "minimum": 0 },
+        "kloc_analizado": { "type": ["number", "null"], "minimum": 0 },
+        "violaciones_estilo": { "type": ["integer", "null"], "minimum": 0 },
+        "controles_aplicables": { "type": ["integer", "null"], "minimum": 0 },
+        "controles_conformes": { "type": ["integer", "null"], "minimum": 0 },
+        "controles_no_probados": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "ids_hallazgos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^A0[1-4]-(SEC|INF|QAL|API)-[0-9]{3}$"
+      }
+    },
+    "archivo_reporte": {
+      "type": "string",
+      "pattern": "^sectest/reports/"
+    }
+  }
+}

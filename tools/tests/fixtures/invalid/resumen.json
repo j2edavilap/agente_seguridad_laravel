@@ -1,0 +1,18 @@
+{
+  "proyecto": "demo-laravel",
+  "version": "abc1234",
+  "fecha": "2026-11-06T10:00:00-03:00",
+  "por_subagente": [],
+  "hallazgos": { "critico": 1, "alto": 0, "medio": 0, "bajo": 0, "informativo": 0 },
+  "dimensiones": { "seguridad": 65, "control_informacion": null, "calidad_software": 71.2 },
+  "no_evaluable": { "seguridad": false, "control_informacion": false, "calidad_software": false },
+  "calculos": {
+    "seguridad": { "formula": "100 - P - B", "entradas": {}, "resultado": 80 },
+    "control_informacion": { "formula": "x", "entradas": {}, "resultado": null },
+    "calidad_software": { "formula": "y", "entradas": {}, "resultado": 71.2 }
+  },
+  "veredicto": "aprobado",
+  "spice": [],
+  "bloqueos": [],
+  "archivo_informe": "sectest/reports/INFORME_FINAL.md"
+}

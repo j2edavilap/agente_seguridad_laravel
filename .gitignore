@@ -14,6 +14,20 @@ dist/
 *.swp
 *.swo
 
+# Salidas generadas por el motor (ejemplos ejecutables)
+engine/examples/*/sectest/reports/*.md
+engine/examples/*/sectest/reports/resumen.json
+engine/examples/*/sectest/reports/hallazgos/
+engine/examples/*/sectest/reports/evidencia/
+engine/examples/*/sectest/tests/
+engine/examples/*/sectest/tools/vendor/
+node_modules/
+
+# .NET
+desktop/**/bin/
+desktop/**/obj/
+desktop/dist/
+
 # Sistema
 .DS_Store
 Thumbs.db

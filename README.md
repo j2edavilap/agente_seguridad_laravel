@@ -5,27 +5,29 @@ proyectos **Laravel 13 / PHP 8.5**. Desde aquí se edita y se despliega a **Open
 **Codex CLI**.
 
 **Para qué está hecho.** Evalúa un proyecto Laravel (seguridad, control de información y calidad de
-software) y escribe informes en `reports/` **sin modificar el código del proyecto auditado**. Es una
+software) y escribe informes en `sectest/reports/` **sin modificar el código del proyecto auditado**. Es una
 herramienta de diagnóstico, no de reparación: describe los problemas en los informes; nunca aplica
 parches ni correcciones.
 
 **Por qué lo hace así.**
 
-- **Un orquestador + cuatro subagentes** en lugar de dieciocho: mantiene el paralelismo útil con un
+- **Un orquestador + seis subagentes** en lugar de dieciocho: mantiene el paralelismo útil con un
   mantenimiento razonable.
 - **Una fuente de verdad (`agents/*.md`):** cada runtime genera sus variantes automáticamente; no hay
   prompts duplicados que se desincronicen.
 - **Autorización humana obligatoria (Paso 0):** el agente no ejecuta nada hasta que el responsable del
-  proyecto firme y guarde `scope/authorization.md`. El agente solo escribe el borrador
-  (`scope/authorization.draft.md`); el rename y la firma los hace un humano.
-- **Solo lectura sobre el proyecto auditado:** `git`, pruebas y comandos destructivos están restringidos;
-  nunca se modifican archivos ni se instalan dependencias.
+  proyecto firme y guarde `sectest/scope/authorization.md`. El agente solo escribe el borrador
+  (`sectest/scope/authorization.draft.md`); el rename y la firma los hace un humano.
+- **Escritura confinada a `sectest/`:** informes, plan, pruebas y herramientas de testing viven ahí.
+  El código de la aplicación, `.env`, `composer.json` y `tests/` del proyecto siguen en solo lectura.
+  Crear pruebas e instalar herramientas requiere su casilla en la autorización.
 
 **Cómo funciona.** El orquestador `laravel-sec-auditor` ejecuta la entrevista de autorización y luego
-delega en cuatro subagentes: `sec-static` (Fase 1: SCA, SAST y Laravel estático), `sec-config` (Fases 2 y
-5: configuración e infraestructura), `sec-dynamic` (Fase 3: pruebas dinámicas contra staging autorizado)
-y `sec-quality` (calidad y SPICE). Cada subagente escribe su propio informe y devuelve solo JSON; el
-orquestador consolida y genera `reports/INFORME_FINAL.md` y `reports/resumen.json`.
+delega en seis subagentes: `sec-static` (Fase 1: SCA, SAST y Laravel estático), `sec-config` (Fases 2 y
+5: configuración e infraestructura), `sec-dynamic` (Fase 3: pruebas dinámicas contra staging autorizado),
+`sec-quality` (calidad y SPICE), y los ayudantes `sec-idor` (canario IDOR/BOLA y enumeración autorizada)
+y `sec-tests` (arnés y ejecución). Cada uno escribe su informe o su JSON; el orquestador consolida y
+genera `sectest/reports/INFORME_FINAL.md` y `sectest/reports/resumen.json`.
 
 **Cómo empezar.**
 
@@ -37,7 +39,7 @@ powershell -ExecutionPolicy Bypass -File .\deploy.ps1
 ```
 
 En el proyecto Laravel a auditar: selecciona el agente `laravel-sec-auditor`, responde la entrevista de
-autorización, firma y guarda `scope/authorization.md`, y pídele: *"evalúa este proyecto"*.
+autorización, firma y guarda `sectest/scope/authorization.md`, y pídele: *"evalúa este proyecto"*.
 
 ## Qué evalúa el auditor en Laravel 13
 
@@ -103,7 +105,7 @@ powershell -ExecutionPolicy Bypass -File .\deploy.ps1
 |---|---|---|
 | OpenCode | `%USERPROFILE%\.config\opencode\agent\` | `agents\*.md` copiados tal cual |
 | Claude Code | `%USERPROFILE%\.claude\agents\` | `dist\claude\agents\*.md` (5) |
-| Codex CLI | `%USERPROFILE%\.codex\agents\` | `dist\codex\agents\*.toml` (4 subagentes) |
+| Codex CLI | `%USERPROFILE%\.codex\agents\` | `dist\codex\agents\*.toml` (6 subagentes) |
 
 Los archivos existentes se respaldan como `<nombre>.bak_<yyyyMMdd_HHmmss>`. El script sale con código
 distinto de cero si algo no valida.
@@ -146,7 +148,7 @@ Copy-Item .\dist\codex\project-kit\.codex  <proyecto>\.codex -Recurse
 ```
 
 Codex carga `.codex/config.toml`, que activa el perfil de permisos `laravel-audit`: workspace en solo
-lectura salvo `reports/` y `scope/authorization.draft.md`. Las reglas de `.codex/rules/` solo se cargan
+lectura salvo `sectest/reports/` y `sectest/scope/authorization.draft.md`. Las reglas de `.codex/rules/` solo se cargan
 si la capa `.codex/` del proyecto está marcada como confiable.
 
 Si el proyecto ya tiene un `AGENTS.md`, añade el contenido en lugar de sobrescribirlo.
@@ -154,7 +156,7 @@ Si el proyecto ya tiene un `AGENTS.md`, añade el contenido en lugar de sobrescr
 ### Salida
 
 ```
-<proyecto>/reports/
+<proyecto>/sectest/reports/
 ├── INDICE.md
 ├── INFORME_FINAL.md
 ├── resumen.json
@@ -170,7 +172,7 @@ La REGLA CERO del prompt es común a los tres. Lo que cambia es qué barrera té
 
 **OpenCode**
 
-1. `permission.edit`: solo `reports/**` y `scope/authorization.draft.md`. El archivo real `scope/authorization.md` queda fuera: lo crea el humano al firmar.
+1. `permission.edit`: solo `sectest/reports/**` y `sectest/scope/authorization.draft.md`. El archivo real `sectest/scope/authorization.md` queda fuera: lo crea el humano al firmar.
 2. `permission.bash`: 34 reglas de denegación (`rm`, `del`, `Remove-Item`, escrituras de `git`,
    `composer require/update`, migraciones y cachés de Laravel), de las cuales 10 son comodines que
    cubren la forma con ruta absoluta al intérprete, más `*authorization.md*`, que bloquea cualquier
@@ -203,7 +205,7 @@ El archivo `settings.json` afecta a **todas** las sesiones de Claude Code en ese
 **Codex CLI**
 
 1. Perfil de permisos `laravel-audit` (`.codex/config.toml`), que extiende `:read-only` y reabre
-   escritura solo en `reports/` y `scope/authorization.draft.md`. Es la barrera real: la aplica el
+   escritura solo en `sectest/reports/` y `sectest/scope/authorization.draft.md`. Es la barrera real: la aplica el
    sandbox del sistema operativo.
 2. `.codex/rules/laravel-audit.rules`: cuatro `prefix_rule` con decisión `forbidden`.
 3. REGLA CERO en `AGENTS.md`.
