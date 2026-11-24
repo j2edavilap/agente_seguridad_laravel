@@ -1,0 +1,45 @@
+{
+  "subagente": "A-CONFIG",
+  "fase": "2,5",
+  "pruebas_ejecutadas": 5,
+  "pruebas_aprobadas": 2,
+  "pruebas_fallidas": 2,
+  "pruebas_bloqueadas": 1,
+  "hallazgos": {
+    "critico": 0,
+    "alto": 0,
+    "medio": 4,
+    "bajo": 3,
+    "informativo": 0
+  },
+  "hallazgos_confirmados": 7,
+  "confirmados": {
+    "critico": 0,
+    "alto": 0,
+    "medio": 4,
+    "bajo": 3,
+    "informativo": 0
+  },
+  "falsos_positivos": 0,
+  "metricas": {
+    "cobertura_lineas_pct": null,
+    "pruebas_totales": null,
+    "pruebas_aprobadas_n": null,
+    "errores_estaticos": null,
+    "kloc_analizado": null,
+    "violaciones_estilo": null,
+    "controles_aplicables": 2,
+    "controles_conformes": 1,
+    "controles_no_probados": 0
+  },
+  "ids_hallazgos": [
+    "A02-INF-001",
+    "A02-INF-002",
+    "A02-INF-003",
+    "A02-INF-004",
+    "A02-SEC-005",
+    "A02-INF-006",
+    "A02-INF-007"
+  ],
+  "archivo_reporte": "sectest/reports/A-02-CONFIG.md"
+}

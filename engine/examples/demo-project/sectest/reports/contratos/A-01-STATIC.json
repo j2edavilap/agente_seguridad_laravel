@@ -1,0 +1,25 @@
+{
+  "subagente": "A-STATIC",
+  "fase": "1",
+  "pruebas_ejecutadas": 10,
+  "pruebas_aprobadas": 6,
+  "pruebas_fallidas": 4,
+  "pruebas_bloqueadas": 0,
+  "hallazgos": { "critico": 0, "alto": 2, "medio": 3, "bajo": 1, "informativo": 0 },
+  "hallazgos_confirmados": 5,
+  "confirmados": { "critico": 0, "alto": 2, "medio": 2, "bajo": 1, "informativo": 0 },
+  "falsos_positivos": 0,
+  "metricas": {
+    "cobertura_lineas_pct": null,
+    "pruebas_totales": null,
+    "pruebas_aprobadas_n": null,
+    "errores_estaticos": 12,
+    "kloc_analizado": 8.5,
+    "violaciones_estilo": null,
+    "controles_aplicables": null,
+    "controles_conformes": null,
+    "controles_no_probados": null
+  },
+  "ids_hallazgos": ["A01-SEC-001", "A01-SEC-002", "A01-SEC-003", "A01-SEC-004", "A01-INF-001"],
+  "archivo_reporte": "sectest/reports/A-01-STATIC.md"
+}

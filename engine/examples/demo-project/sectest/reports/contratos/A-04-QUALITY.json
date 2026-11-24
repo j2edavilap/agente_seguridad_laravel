@@ -1,0 +1,25 @@
+{
+  "subagente": "A-QUALITY",
+  "fase": "transversal,6",
+  "pruebas_ejecutadas": 10,
+  "pruebas_aprobadas": 9,
+  "pruebas_fallidas": 1,
+  "pruebas_bloqueadas": 0,
+  "hallazgos": { "critico": 0, "alto": 0, "medio": 0, "bajo": 0, "informativo": 0 },
+  "hallazgos_confirmados": 0,
+  "confirmados": { "critico": 0, "alto": 0, "medio": 0, "bajo": 0, "informativo": 0 },
+  "falsos_positivos": 0,
+  "metricas": {
+    "cobertura_lineas_pct": 80,
+    "pruebas_totales": 10,
+    "pruebas_aprobadas_n": 9,
+    "errores_estaticos": null,
+    "kloc_analizado": null,
+    "violaciones_estilo": 0,
+    "controles_aplicables": null,
+    "controles_conformes": null,
+    "controles_no_probados": null
+  },
+  "ids_hallazgos": [],
+  "archivo_reporte": "sectest/reports/A-04-QUALITY.md"
+}

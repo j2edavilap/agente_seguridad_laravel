@@ -1,0 +1,25 @@
+{
+  "advisories": {
+    "laravel/framework": [
+      {
+        "advisoryId": "PKSA-1234",
+        "packageName": "laravel/framework",
+        "affectedVersions": "<10.0.0",
+        "title": "Remote code execution",
+        "cve": "CVE-2023-0001",
+        "link": "https://example.invalid/PKSA-1234",
+        "severity": "high"
+      }
+    ],
+    "old/pkg": [
+      {
+        "advisoryId": "PKSA-9999",
+        "packageName": "old/pkg",
+        "affectedVersions": ">=1.0,<1.2",
+        "title": "Unsafe deserialization",
+        "severity": null
+      }
+    ]
+  },
+  "abandoned": { "old/pkg": "no replacement" }
+}

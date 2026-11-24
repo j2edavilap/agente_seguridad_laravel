@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "login": {
+    "url": "/login",
+    "contentType": "form",
+    "fields": {
+      "email": "{{username}}",
+      "password": "{{password}}"
+    },
+    "csrf": {
+      "url": "/login",
+      "field": "_token",
+      "pattern": "name=\"_token\" value=\"([^\"]+)\""
+    },
+    "successStatus": [302]
+  },
+  "adminEndpoints": [
+    { "name": "panel de usuarios", "url": "/admin/users", "expect": [403] }
+  ],
+  "crossAccess": [
+    {
+      "name": "factura del usuario B",
+      "url": "/api/invoices/1",
+      "as": "user",
+      "owner": "userB",
+      "expect": [403, 404]
+    }
+  ],
+  "smoke": ["/", "/login"],
+  "enumerate": [
+    { "name": "facturas secuenciales", "urlTemplate": "/api/invoices/{id}", "from": 5000, "to": 5010, "as": "user", "expect": [403, 404] }
+  ],
+  "pending": [
+    { "name": "invoices.show", "uri": "/api/invoices/{invoice}", "note": "requiere un ID real de otro usuario" }
+  ],
+  "logout": {
+    "url": "/logout",
+    "protectedUrl": "/api/me"
+  }
+}

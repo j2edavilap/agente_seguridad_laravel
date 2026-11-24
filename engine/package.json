@@ -1,0 +1,15 @@
+{
+  "name": "laravel-sec-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Motor determinista de auditoria para Laravel: gate de autorizacion, contrato, scoring y reportes.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node src/cli.js check",
+    "run": "node src/cli.js run"
+  }
+}

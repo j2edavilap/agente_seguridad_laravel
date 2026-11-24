@@ -1,0 +1,27 @@
+[
+  {
+    "RuleID": "generic-api-key",
+    "Description": "Generic API Key",
+    "StartLine": 12,
+    "EndLine": 12,
+    "File": "config/app.php",
+    "Secret": "REDACTED",
+    "Match": "password = REDACTED"
+  },
+  {
+    "RuleID": "generic-api-key",
+    "Description": "Generic API Key",
+    "StartLine": 12,
+    "EndLine": 12,
+    "File": "config/app.php",
+    "Secret": "REDACTED"
+  },
+  {
+    "RuleID": "private-key",
+    "Description": "Private Key",
+    "StartLine": 3,
+    "EndLine": 3,
+    "File": "keys/id_rsa",
+    "Secret": "REDACTED"
+  }
+]

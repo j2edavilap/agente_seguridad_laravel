@@ -1,0 +1,19 @@
+{
+  "totals": { "errors": 0, "file_errors": 3 },
+  "files": {
+    "C:\\demo\\app\\Foo.php": {
+      "errors": 2,
+      "messages": [
+        { "message": "Call to an undefined method Foo::y().", "line": 10, "ignorable": true, "identifier": "method.notFound" },
+        { "message": "Call to an undefined method Foo::z().", "line": 12, "ignorable": true, "identifier": "method.notFound" }
+      ]
+    },
+    "C:\\demo\\app\\Bar.php": {
+      "errors": 1,
+      "messages": [
+        { "message": "Variable $x might not be defined.", "line": 5, "ignorable": true, "identifier": "variable.undefined" }
+      ]
+    }
+  },
+  "errors": []
+}
